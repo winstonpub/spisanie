@@ -237,8 +237,9 @@ function handleProductCommand(body) {
   if (product.sku !== draft.sku) throw new Error('Артикул в строке изменился. Проверьте базу.');
 
   if (body.cmd === 'product.barcode') {
-    const barcode = productText(body.barcode, 'штрихкод', 128);
-    if (!/^[\x20-\x7e]+$/.test(barcode)) throw new Error('Штрихкод должен содержать цифры или латинские символы');
+    const normalizedBarcode = typeof body.barcode === 'string' ? body.barcode.replace(/\s+/g, '') : '';
+    const barcode = productText(normalizedBarcode, 'штрихкод', 128);
+    if (!/^\d+$/.test(barcode)) throw new Error('Штрихкод должен содержать только цифры');
     if ((product.barcode && product.barcode !== barcode) || product.name) {
       throw new Error('Штрихкод или наименование уже изменены. Проверьте строку товара.');
     }

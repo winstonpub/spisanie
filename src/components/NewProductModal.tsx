@@ -22,6 +22,11 @@ function operationId() {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+/** Оставляет только цифры, удаляя все пробелы и любой текст */
+function sanitizeBarcode(value: string): string {
+  return value.replace(/\s+/g, "").replace(/\D+/g, "").slice(0, 128);
+}
+
 export default function NewProductModal({ sku, categoryTitle, catalogUrl, scriptUrl, onComplete, onClose }: NewProductModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const operation = useRef<ProductOperation | null>(null);
@@ -57,8 +62,9 @@ export default function NewProductModal({ sku, categoryTitle, catalogUrl, script
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (busyRef.current) return;
-    if (step === "barcode" && (!barcode.trim() || !/^[\x20-\x7e]+$/.test(barcode.trim()))) {
-      setError("Введите штрихкод: цифры или латинские символы.");
+    const cleanBarcode = sanitizeBarcode(barcode);
+    if (step === "barcode" && !/^\d+$/.test(cleanBarcode)) {
+      setError("Введите штрихкод (только цифры).");
       return;
     }
     if (step === "name" && !name.trim()) {
@@ -74,7 +80,7 @@ export default function NewProductModal({ sku, categoryTitle, catalogUrl, script
       const result = await writeCatalogStep(
         operation.current!,
         step === "offer" ? "product.begin" : step === "barcode" ? "product.barcode" : "product.name",
-        step === "barcode" ? { barcode: barcode.trim() } : step === "name" ? { name: name.trim() } : {},
+        step === "barcode" ? { barcode: cleanBarcode } : step === "name" ? { name: name.trim() } : {},
       );
       if (!mountedRef.current) return;
       if (result.status === "complete") {
@@ -167,9 +173,23 @@ export default function NewProductModal({ sku, categoryTitle, catalogUrl, script
                   id="new-product-barcode"
                   data-step-focus
                   value={barcode}
-                  onChange={(event) => { setBarcode(event.target.value); setError(null); }}
+                  onChange={(event) => {
+                    setBarcode(sanitizeBarcode(event.target.value));
+                    setError(null);
+                  }}
+                  onPaste={(event) => {
+                    event.preventDefault();
+                    const pasted = sanitizeBarcode(event.clipboardData.getData("text"));
+                    const target = event.currentTarget;
+                    const start = target.selectionStart ?? barcode.length;
+                    const end = target.selectionEnd ?? barcode.length;
+                    const next = sanitizeBarcode(barcode.slice(0, start) + pasted + barcode.slice(end));
+                    setBarcode(next);
+                    setError(null);
+                  }}
                   disabled={busy}
-                  maxLength={128}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   autoComplete="off"
                   spellCheck={false}
                   required
@@ -180,7 +200,7 @@ export default function NewProductModal({ sku, categoryTitle, catalogUrl, script
                 type="button"
                 disabled={busy}
                 onClick={() => setCameraOpen(true)}
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium transition hover:bg-slate-50 disabled:opacity-50"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium transition hover:bg-slate-50 disabled:opacity-50 md:hidden"
               >
                 <CameraIcon className="h-4 w-4" /> Открыть камеру
               </button>
@@ -234,7 +254,16 @@ export default function NewProductModal({ sku, categoryTitle, catalogUrl, script
       {cameraOpen && (
         <BarcodeScannerModal
           onClose={() => setCameraOpen(false)}
-          onDetected={(value) => { setBarcode(value); setError(null); setCameraOpen(false); }}
+          onDetected={(value) => {
+            const digits = sanitizeBarcode(value);
+            setCameraOpen(false);
+            if (digits) {
+              setBarcode(digits);
+              setError(null);
+            } else {
+              setError("Считанный код не содержит цифр. Попробуйте ещё раз или введите штрихкод вручную.");
+            }
+          }}
         />
       )}
     </dialog>

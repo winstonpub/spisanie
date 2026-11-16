@@ -30,7 +30,7 @@ test('retries and completed duplicate SKUs never append duplicate rows', () => {
   const server = createCatalogServer();
   const op = operation();
   for (let i = 0; i < 2; i++) assert.equal(server.post({ ...op, cmd: 'product.begin' }).row, 2);
-  for (let i = 0; i < 2; i++) assert.equal(server.post({ ...op, cmd: 'product.barcode', barcode: 'ABC123' }).ok, true);
+  for (let i = 0; i < 2; i++) assert.equal(server.post({ ...op, cmd: 'product.barcode', barcode: '4601234567890' }).ok, true);
   for (let i = 0; i < 2; i++) assert.equal(server.post({ ...op, cmd: 'product.name', name: 'New item' }).status, 'complete');
   const duplicate = server.post({ ...operation('00000999', 0, 'two'), cmd: 'product.begin' });
   assert.equal(duplicate.exists, true);
@@ -38,13 +38,15 @@ test('retries and completed duplicate SKUs never append duplicate rows', () => {
   assert.equal(server.sheets.get(0).getLastRow(), 2);
 });
 
-test('joinery commands target the joinery catalog, not the write-off list', () => {
+test('joinery commands target the joinery catalog and strip spaces from barcode digits', () => {
   const server = createCatalogServer();
   const op = operation('JOIN-NEW', 1557440748);
   assert.equal(server.post({ ...op, cmd: 'product.begin' }).row, 2);
-  server.post({ ...op, cmd: 'product.barcode', barcode: 'ABC123' });
+  const bc = server.post({ ...op, cmd: 'product.barcode', barcode: '4 601234 567890' });
+  assert.equal(bc.ok, true);
+  assert.equal(bc.product.barcode, '4601234567890');
   assert.equal(server.post({ ...op, cmd: 'product.name', name: 'Joinery item' }).ok, true);
-  assert.deepEqual(server.sheets.get(1557440748).data[1], ['JOIN-NEW', 'ABC123', 'Joinery item']);
+  assert.deepEqual(server.sheets.get(1557440748).data[1], ['JOIN-NEW', '4601234567890', 'Joinery item']);
   assert.equal(server.sheets.get(0).getLastRow(), 1);
   assert.equal(server.sheets.get(317840889).getLastRow(), 0);
 });
@@ -53,7 +55,7 @@ test('cancel removes only the owned incomplete A:C row and is repeatable', () =>
   const server = createCatalogServer();
   const op = operation();
   server.post({ ...op, cmd: 'product.begin' });
-  server.post({ ...op, cmd: 'product.barcode', barcode: 'ABC' });
+  server.post({ ...op, cmd: 'product.barcode', barcode: '4600000123456' });
   server.sheets.get(0).data[1][3] = 'unrelated cell';
   assert.equal(server.post({ ...op, cmd: 'product.cancel' }).status, 'cancelled');
   assert.equal(server.post({ ...op, cmd: 'product.cancel' }).status, 'cancelled');
@@ -73,7 +75,7 @@ test('cancel cannot remove completed items or drafts edited by someone else', ()
   assert.equal(server.sheets.get(0).data[1][2], 'manual edit');
   const complete = operation('another-item', 0, 'complete');
   server.post({ ...complete, cmd: 'product.begin' });
-  server.post({ ...complete, cmd: 'product.barcode', barcode: 'ABC' });
+  server.post({ ...complete, cmd: 'product.barcode', barcode: '4600000654321' });
   server.post({ ...complete, cmd: 'product.name', name: 'Completed item' });
   assert.equal(server.post({ ...complete, cmd: 'product.cancel' }).status, 'complete');
   assert.equal(server.sheets.get(0).data[2][2], 'Completed item');
@@ -84,13 +86,13 @@ test('SKU lookup still locates the correct row after sorting', () => {
   const op = operation();
   server.post({ ...op, cmd: 'product.begin' });
   server.sheets.get(0).data.reverse();
-  const response = server.post({ ...op, cmd: 'product.barcode', barcode: 'ABC' });
+  const response = server.post({ ...op, cmd: 'product.barcode', barcode: '4609999888777' });
   assert.equal(response.row, 1);
-  assert.equal(server.sheets.get(0).data[0][1], 'ABC');
+  assert.equal(server.sheets.get(0).data[0][1], '4609999888777');
   assert.equal(server.sheets.get(0).data[1][1], '4620747181525');
 });
 
-test('invalid input, foreign targets and duplicate unfinished SKUs are rejected', () => {
+test('invalid input, text barcodes, foreign targets and duplicate unfinished SKUs are rejected', () => {
   const server = createCatalogServer();
   const op = operation();
   assert.equal(server.post({ ...op, cmd: 'product.name', name: 'Early' }).ok, false);
@@ -101,6 +103,7 @@ test('invalid input, foreign targets and duplicate unfinished SKUs are rejected'
   server.post({ ...op, cmd: 'product.begin' });
   assert.equal(server.post({ ...operation('00000999', 0, 'other'), cmd: 'product.begin' }).ok, false);
   assert.equal(server.post({ ...op, cmd: 'product.barcode', barcode: ' ' }).ok, false);
+  assert.equal(server.post({ ...op, cmd: 'product.barcode', barcode: 'ABC123' }).ok, false);
   assert.equal(server.post({ ...op, cmd: 'product.name', name: 'too early' }).ok, false);
 });
 

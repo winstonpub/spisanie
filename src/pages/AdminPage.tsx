@@ -97,18 +97,18 @@ export default function AdminPage({ settings, onChange, onBack }: AdminPageProps
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-white text-slate-900">
+      <header className="border-b border-[#20282B] bg-[#20282B] text-white">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3 sm:px-6">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-white/15"
           >
             <ArrowLeftIcon className="h-4 w-4" />
             Назад
           </button>
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white">
               <GearIcon className="h-5 w-5" />
             </div>
             <h1 className="text-lg font-semibold tracking-tight">Настройки</h1>
@@ -120,10 +120,6 @@ export default function AdminPage({ settings, onChange, onBack }: AdminPageProps
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-100 px-5 py-4">
             <h2 className="font-semibold">Таблицы отделов</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Для каждого отдела: таблица товаров (A — артикул, B — штрихкод, C — наименование) и лист
-              для записи (A — артикул, B — количество).
-            </p>
           </div>
 
           <div className="divide-y divide-slate-100">

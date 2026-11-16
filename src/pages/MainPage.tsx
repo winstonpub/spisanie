@@ -3,10 +3,11 @@ import type { ClipboardEvent, Dispatch, KeyboardEvent, SetStateAction } from "re
 import { flushSync } from "react-dom";
 import Barcode from "../components/Barcode";
 import BarcodeScannerModal from "../components/BarcodeScannerModal";
+import DepartmentDropdown from "../components/DepartmentDropdown";
 import NewProductModal from "../components/NewProductModal";
+import BrandLogo from "../components/BrandLogo";
 import {
   AlertIcon,
-  BarcodeLogo,
   CameraIcon,
   CheckIcon,
   PlusIcon,
@@ -19,7 +20,6 @@ import {
 import { formatCount, formatDate, formatTime } from "../lib/format";
 import { makeRow } from "../lib/rows";
 import type { Row } from "../lib/rows";
-import { CATEGORIES } from "../lib/settings";
 import type { Category, CategoryId } from "../lib/settings";
 import { normalizeBarcode, normalizeSku } from "../lib/sheet";
 import type { Product, SheetData } from "../lib/sheet";
@@ -400,35 +400,16 @@ export default function MainPage({
 
   return (
     <>
-      <div className="min-h-screen bg-slate-50 text-slate-900 print:hidden">
+      <div className="min-h-screen bg-white text-slate-900 print:hidden">
       {/* Шапка */}
-      <header className="border-b border-slate-200 bg-white print:hidden">
+      <header className="border-b border-[#20282B] bg-[#20282B] text-white print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <a href="#/" className="flex items-center gap-2.5" aria-label="Списание — на главную">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm">
-                <BarcodeLogo className="h-6 w-6" />
-              </span>
-              <span className="text-base font-semibold tracking-tight">Списание</span>
+          <div className="relative flex flex-wrap items-center gap-3">
+            <a href="#/" className="flex shrink-0 items-center" aria-label="Списание — на главную">
+              <BrandLogo className="block h-12 w-auto sm:h-14" />
             </a>
-            <span className="hidden h-6 w-px bg-slate-200 sm:block" />
-            <nav aria-label="Страницы отделов" className="flex flex-wrap items-center gap-1">
-              {CATEGORIES.map((c) => (
-                <a
-                  key={c.id}
-                  href={`#/${c.id}`}
-                  aria-current={c.id === category.id ? "page" : undefined}
-                  className={cn(
-                    "rounded-lg px-3 py-2 text-sm font-medium transition",
-                    c.id === category.id
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  )}
-                >
-                  {c.title}
-                </a>
-              ))}
-            </nav>
+            <span className="hidden h-8 w-px bg-white/20 sm:block" />
+            <DepartmentDropdown activeCategory={category} />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -436,7 +417,7 @@ export default function MainPage({
             <button
               onClick={onRefresh}
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-white/15 disabled:opacity-50"
             >
               <RefreshIcon className={cn("h-4 w-4", loading && "animate-spin")} />
               Обновить
@@ -448,9 +429,6 @@ export default function MainPage({
       <main className="mx-auto max-w-7xl px-4 pb-28 pt-6 sm:px-6 print:max-w-none print:px-0 print:py-0">
         <div className="mb-4 print:hidden">
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{category.title}</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Страница отдела: артикулы, штрихкоды и наименования товаров
-          </p>
         </div>
 
         {showNotice && (
@@ -580,7 +558,9 @@ export default function MainPage({
                           </span>
                         ) : status === "found" ? (
                           <span className="text-xs text-slate-400">Штрихкод отсутствует</span>
-                        ) : null}
+                        ) : (
+                          <span className="hidden text-slate-300 md:inline">—</span>
+                        )}
 
                         {status === "missing" && (
                           <button
@@ -593,14 +573,16 @@ export default function MainPage({
                           </button>
                         )}
 
-                        <button
-                          type="button"
-                          onClick={() => openScanner(row.id)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          <CameraIcon className="h-4 w-4" />
-                          Открыть камеру
-                        </button>
+                        {!(status === "found" && product?.barcode) && (
+                          <button
+                            type="button"
+                            onClick={() => openScanner(row.id)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 md:hidden"
+                          >
+                            <CameraIcon className="h-4 w-4" />
+                            Открыть камеру
+                          </button>
+                        )}
 
                         {scanFeedback?.rowId === row.id && (
                           <span className="max-w-48 text-xs leading-snug text-rose-600" title={scanFeedback.barcode}>
@@ -825,7 +807,7 @@ function Chip({ label, value, tone }: { label: string; value: number; tone: "sla
 function DataStatus({ data, loading }: { data: SheetData | null; loading: boolean }) {
   if (!data) {
     return loading ? (
-      <span className="inline-flex items-center gap-2 text-sm text-slate-500">
+      <span className="inline-flex items-center gap-2 text-sm text-white/70">
         <SpinnerIcon className="h-4 w-4 animate-spin" />
         Загрузка таблицы…
       </span>
@@ -858,10 +840,10 @@ function DataStatus({ data, loading }: { data: SheetData | null; loading: boolea
   return (
     <div className="flex items-center gap-2 text-sm" title={title}>
       <span className={cn("h-2 w-2 shrink-0 rounded-full", dot)} />
-      <span className="text-slate-600">
+      <span className="text-white/85">
         {label && <span>{label} · </span>}
         {formatCount(data.count)}
-        {data.loadedAt && <span className="text-slate-400"> · {formatTime(data.loadedAt)}</span>}
+        {data.loadedAt && <span className="text-white/60"> · {formatTime(data.loadedAt)}</span>}
       </span>
     </div>
   );

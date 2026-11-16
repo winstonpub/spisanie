@@ -91,6 +91,11 @@ async function barcode(dialog, value = '0001234567895') {
   await dialog.getByLabel('Наименование', { exact: true }).waitFor();
 }
 
+async function switchDepartment(page, name) {
+  await page.locator('nav[aria-label="Страницы отделов"] button[aria-haspopup="menu"]').click();
+  await page.locator('div[role="menu"]').getByRole('menuitem', { name }).click();
+}
+
 (async () => {
   const browser = await chromium.launch({ args: ['--use-fake-ui-for-media-stream'] });
   try {
@@ -113,8 +118,8 @@ async function barcode(dialog, value = '0001234567895') {
       assert.deepEqual(server.sheets.get(0).data[1], ['000NEW01', '0001234567895', 'New product after barcode']);
       assert.match(await page.locator('.main-entry-table tbody tr').first().innerText(), /New product after barcode/);
       assert.equal(await page.locator('.main-entry-table tbody tr').first().locator('svg.max-w-full').count(), 1);
-      await page.locator('nav a[href="#/joinery"]').click();
-      await page.locator('nav a[href="#/construction"]').click();
+      await switchDepartment(page, 'Столярные изделия');
+      await switchDepartment(page, 'Строительные материалы');
       await page.waitForTimeout(500);
       assert.match(await page.locator('.main-entry-table tbody tr').first().innerText(), /New product after barcode/);
       assert.equal(server.calls.filter((call) => call.cmd === 'product.begin').length, 1);
@@ -133,7 +138,7 @@ async function barcode(dialog, value = '0001234567895') {
       await page.getByRole('button', { name: 'Добавить в базу', exact: true }).click();
       await dialog.getByRole('button', { name: 'Добавить', exact: true }).click();
       await dialog.getByLabel('Штрихкод', { exact: true }).waitFor();
-      await barcode(dialog, 'CANCEL-CODE');
+      await barcode(dialog, '4600000111222');
       await dialog.getByRole('button', { name: 'Закрыть', exact: true }).click();
       await dialog.waitFor({ state: 'detached' });
       assert.deepEqual(server.sheets.get(0).data[1], ['', '', '']);
@@ -177,7 +182,7 @@ async function barcode(dialog, value = '0001234567895') {
 
     {
       const { page, context, server, errors } = await scenario(browser);
-      await page.locator('nav a[href="#/joinery"]').click();
+      await switchDepartment(page, 'Столярные изделия');
       await page.waitForTimeout(500);
       const dialog = await begin(page, 'MOBILE-NEW');
       for (const width of [320, 375, 430]) {
@@ -273,7 +278,7 @@ async function barcode(dialog, value = '0001234567895') {
 
     {
       const { page, context } = await scenario(browser, { catalogDelay: 1500 });
-      await page.locator('nav a[href="#/joinery"]').click();
+      await switchDepartment(page, 'Столярные изделия');
       await page.getByLabel('Артикул, строка 1', { exact: true }).fill('89435511');
       await page.waitForTimeout(900);
       assert.equal(await page.locator('.new-product-dialog').count(), 0);
