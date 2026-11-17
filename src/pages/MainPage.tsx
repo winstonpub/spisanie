@@ -101,6 +101,7 @@ interface MainPageProps {
   logGid: string;
   onOpenSettings: () => void;
   logScriptUrl: string;
+  basePath: string;
   /** Завершена ли первичная подгрузка записей из листа отдела */
   prefillReady: boolean;
   catalogUrl: string;
@@ -117,6 +118,7 @@ export default function MainPage({
   logGid,
   onOpenSettings,
   logScriptUrl,
+  basePath,
   prefillReady,
   catalogUrl,
   onProductAdded,
@@ -405,11 +407,11 @@ export default function MainPage({
       <header className="border-b border-[#20282B] bg-[#20282B] text-white print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="relative flex flex-wrap items-center gap-3">
-            <a href="#/" className="flex shrink-0 items-center" aria-label="Списание — на главную">
+            <a href={`${basePath}/`} className="flex shrink-0 items-center" aria-label="Списание — на главную">
               <BrandLogo className="block h-12 w-auto sm:h-14" />
             </a>
             <span className="hidden h-8 w-px bg-white/20 sm:block" />
-            <DepartmentDropdown activeCategory={category} />
+            <DepartmentDropdown activeCategory={category} basePath={basePath} />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

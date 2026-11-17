@@ -25,5 +25,8 @@ dist-ssr
 *.sln
 *.sw?
 
+# Generated clean-URL SPA fallback (создаётся GitHub Actions)
+public/404.html
+
 # Build artifacts
 .DS_Store

@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import constructionCsv from "../data/construction.csv?raw";
+import constructionCsv from "../data/01_dept.csv?raw";
 
 export interface Product {
   sku: string;

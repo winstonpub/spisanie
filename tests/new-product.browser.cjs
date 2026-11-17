@@ -18,7 +18,7 @@ async function scenario(browser, options = {}) {
   let cancelError = !!options.cancelError;
   const external = [];
   await context.addInitScript((config) => {
-    localStorage.setItem('barcode-app:settings:v1', JSON.stringify({ active: 'construction', ...config }));
+    localStorage.setItem('barcode-app:settings:v1', JSON.stringify({ active: '01_dept', ...config }));
   }, options.settings || {});
   // No request made by these tests can modify a real Google Sheet.
   await context.route('**/*', async (route) => {
@@ -63,7 +63,7 @@ async function scenario(browser, options = {}) {
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto(`${BASE}/#/construction`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/01_dept`, { waitUntil: 'networkidle' });
   return { context, page, server, errors, external };
 }
 
@@ -229,7 +229,7 @@ async function switchDepartment(page, name) {
 
     {
       const { page, context, server } = await scenario(browser, {
-        settings: { links: { construction: `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit?gid=1557440748` } },
+        settings: { links: { "01_dept": `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit?gid=1557440748` } },
       });
       const dialog = await begin(page, 'LINKED-CATALOG');
       const request = server.calls.find((call) => call.cmd === 'product.begin');

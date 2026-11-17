@@ -5,11 +5,12 @@ import type { Category, CategoryId } from "../lib/settings";
 import { cn } from "../utils/cn";
 
 interface DepartmentDropdownProps {
+  basePath: string;
   activeCategory: Category;
 }
 
 function CategoryIcon({ id }: { id: CategoryId }) {
-  if (id === "construction") {
+  if (id === "01_dept") {
     return (
       <svg
         aria-hidden="true"
@@ -54,7 +55,7 @@ function CategoryIcon({ id }: { id: CategoryId }) {
   );
 }
 
-export default function DepartmentDropdown({ activeCategory }: DepartmentDropdownProps) {
+export default function DepartmentDropdown({ activeCategory, basePath }: DepartmentDropdownProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -158,7 +159,7 @@ export default function DepartmentDropdown({ activeCategory }: DepartmentDropdow
                 }}
                 role="menuitem"
                 aria-current={active ? "page" : undefined}
-                href={`#/${item.id}`}
+                href={`${basePath}/${item.id}`}
                 onClick={() => setOpen(false)}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#F5C400]",
