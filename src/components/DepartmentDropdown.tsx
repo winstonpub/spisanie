@@ -7,6 +7,7 @@ import { cn } from "../utils/cn";
 interface DepartmentDropdownProps {
   basePath: string;
   activeCategory: Category;
+  onSelect: (id: CategoryId) => void;
 }
 
 function CategoryIcon({ id }: { id: CategoryId }) {
@@ -55,7 +56,7 @@ function CategoryIcon({ id }: { id: CategoryId }) {
   );
 }
 
-export default function DepartmentDropdown({ activeCategory, basePath }: DepartmentDropdownProps) {
+export default function DepartmentDropdown({ activeCategory, basePath, onSelect }: DepartmentDropdownProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -160,7 +161,21 @@ export default function DepartmentDropdown({ activeCategory, basePath }: Departm
                 role="menuitem"
                 aria-current={active ? "page" : undefined}
                 href={`${basePath}/${item.id}`}
-                onClick={() => setOpen(false)}
+                onClick={(event) => {
+                  setOpen(false);
+                  if (
+                    event.defaultPrevented ||
+                    event.button !== 0 ||
+                    event.metaKey ||
+                    event.ctrlKey ||
+                    event.shiftKey ||
+                    event.altKey
+                  ) {
+                    return;
+                  }
+                  event.preventDefault();
+                  onSelect(item.id);
+                }}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#F5C400]",
                   active ? "bg-[#FFF8D6]" : "hover:bg-[#f4f3ee]",

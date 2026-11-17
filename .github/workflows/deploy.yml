@@ -31,13 +31,16 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
-
-      - name: Prepare clean-URL SPA fallback
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
         run: |
-          mkdir -p public
-          cp dist/index.html public/404.html
+          if [ -f public/CNAME ] || echo "$REPO_NAME" | grep -qi '\.github\.io$'; then
+            export VITE_BASE_PATH=""
+          else
+            export VITE_BASE_PATH="/$REPO_NAME"
+          fi
           npm run build
+          cp dist/index.html dist/404.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

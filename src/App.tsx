@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import SettingsButton from "./components/SettingsButton";
-import { usePageRoute } from "./hooks/usePageRoute";
+import { pagePath, usePageRoute } from "./hooks/usePageRoute";
 import { useSheetData } from "./hooks/useSheetData";
 import { makeRow } from "./lib/rows";
 import type { Row } from "./lib/rows";
@@ -9,10 +9,10 @@ import { fetchLogRows } from "./lib/logSheet";
 import { fetchRemoteScriptUrl } from "./lib/remoteConfig";
 import { CATEGORIES, getCategory, loadSettings, logGidOf, saveSettings, SETTINGS_STORAGE_KEY } from "./lib/settings";
 import type { CategoryId, Settings } from "./lib/settings";
-import AdminPage from "./pages/AdminPage";
-import NotFoundPage from "./pages/NotFoundPage";
 import Page01Dept from "./pages/01_dept";
 import Page02Dept from "./pages/02_dept";
+import NotFoundPage from "./pages/404";
+import AdminPage from "./pages/AdminPage";
 
 const APP_TITLE = "Списание";
 type RowsByCategory = Record<CategoryId, Row[]>;
@@ -27,7 +27,7 @@ const byCategory = <T,>(make: () => T): Record<CategoryId, T> =>
 
 export default function App() {
   const [settings, setSettings] = useState<Settings>(loadSettings);
-  const { route, navigate, replace, basePath } = usePageRoute(settings.active);
+  const { route, navigate, basePath } = usePageRoute(settings.active);
   const [rowsByCategory, setRowsByCategory] = useState<RowsByCategory>(initialRows);
   const [logReady, setLogReady] = useState<FlagsByCategory>(() => byCategory(() => false));
 
@@ -36,14 +36,15 @@ export default function App() {
     saveSettings(next);
   }, []);
 
-  const page: CategoryId | "admin" = route === null || route === "notfound" ? settings.active : route;
-  const activeId: CategoryId = page === "admin" ? settings.active : page;
+  const activeId: CategoryId = route === "01_dept" || route === "02_dept" ? route : settings.active;
   const category = getCategory(activeId);
   const { data, loading, refresh, acceptProduct } = useSheetData(settings.links[activeId]);
 
   useEffect(() => {
-    if (page !== "admin" && settings.active !== page) updateSettings({ ...settings, active: page });
-  }, [page, settings, updateSettings]);
+    if ((route === "01_dept" || route === "02_dept") && settings.active !== route) {
+      updateSettings({ ...settings, active: route });
+    }
+  }, [route, settings, updateSettings]);
 
   // При первом запуске подгружаем URL скрипта и записи из листов отделов
   useEffect(() => {
@@ -79,10 +80,6 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    if (route === null) replace(page);
-  }, [route, page, replace]);
-
   const rows = rowsByCategory[activeId];
   const setRows: Dispatch<SetStateAction<Row[]>> = useCallback(
     (updater) => {
@@ -93,7 +90,7 @@ export default function App() {
         return { ...prev, [activeId]: next };
       });
     },
-    [activeId]
+    [activeId],
   );
 
   useEffect(() => {
@@ -105,19 +102,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.title =
-      route === "notfound"
-        ? `Страница не найдена (404) · ${APP_TITLE}`
-        : page === "admin"
-          ? `Настройки · ${APP_TITLE}`
-          : `${category.title} · ${APP_TITLE}`;
-  }, [route, page, category.title]);
+    if (route === "404") {
+      document.title = `Страница не найдена (404) · ${APP_TITLE}`;
+    } else if (route === "admin") {
+      document.title = `Настройки · ${APP_TITLE}`;
+    } else {
+      document.title = `${category.title} · ${APP_TITLE}`;
+    }
+  }, [route, category.title]);
 
-  if (route === "notfound") {
-    return <NotFoundPage basePath={basePath} onHome={() => navigate(settings.active)} />;
+  if (route === "404") {
+    return (
+      <NotFoundPage
+        homeHref={pagePath(settings.active, basePath)}
+        onGoHome={() => navigate(settings.active)}
+      />
+    );
   }
 
-  if (page === "admin") {
+  if (route === "admin") {
     return <AdminPage settings={settings} onChange={updateSettings} onBack={() => navigate(settings.active)} />;
   }
   const DepartmentPage = activeId === "01_dept" ? Page01Dept : Page02Dept;
@@ -132,6 +135,7 @@ export default function App() {
         loading={loading}
         onRefresh={refresh}
         onOpenSettings={() => navigate("admin")}
+        onSelectCategory={(id) => navigate(id)}
         basePath={basePath}
         logGid={logGidOf(settings.logLinks[activeId])}
         catalogUrl={settings.links[activeId]}

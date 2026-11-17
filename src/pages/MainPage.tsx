@@ -100,6 +100,7 @@ interface MainPageProps {
   /** gid листа записи (артикул + количество); пустая строка — запись выключена */
   logGid: string;
   onOpenSettings: () => void;
+  onSelectCategory: (id: CategoryId) => void;
   logScriptUrl: string;
   basePath: string;
   /** Завершена ли первичная подгрузка записей из листа отдела */
@@ -117,6 +118,7 @@ export default function MainPage({
   category,
   logGid,
   onOpenSettings,
+  onSelectCategory,
   logScriptUrl,
   basePath,
   prefillReady,
@@ -407,11 +409,20 @@ export default function MainPage({
       <header className="border-b border-[#20282B] bg-[#20282B] text-white print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="relative flex flex-wrap items-center gap-3">
-            <a href={`${basePath}/`} className="flex shrink-0 items-center" aria-label="Списание — на главную">
+            <a
+              href={`${basePath}/01_dept`}
+              onClick={(e) => {
+                if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                onSelectCategory("01_dept");
+              }}
+              className="flex shrink-0 items-center"
+              aria-label="Списание — на главную"
+            >
               <BrandLogo className="block h-12 w-auto sm:h-14" />
             </a>
             <span className="hidden h-8 w-px bg-white/20 sm:block" />
-            <DepartmentDropdown activeCategory={category} basePath={basePath} />
+            <DepartmentDropdown activeCategory={category} basePath={basePath} onSelect={onSelectCategory} />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

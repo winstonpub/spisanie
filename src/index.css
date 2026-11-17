@@ -4,18 +4,24 @@
   display: none;
 }
 
-.new-product-dialog::backdrop {
-  background: rgb(15 23 42 / 65%);
-}
-
-.new-product-dialog[open] {
-  animation: product-dialog-enter 160ms ease-out;
+.nf-page {
+  font-family: "Onest", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .nf-art svg {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.new-product-dialog::backdrop {
+  background: rgb(15 23 42 / 65%);
+}
+
+.new-product-dialog[open] {
+  animation: product-dialog-enter 160ms ease-out;
 }
 
 @keyframes product-dialog-enter {
