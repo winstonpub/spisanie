@@ -13,41 +13,12 @@ const NOT_FOUND_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="236" heigh
     @keyframes widen { from { opacity: 0; transform: scaleX(0) } to { opacity: 1; transform: scaleX(1) } }
     @keyframes extend { from { opacity: 0; transform: scaleY(0) } to { opacity: 1; transform: scaleY(1) } }
     @keyframes pop { from { opacity: 0; transform: scale(0.3) } to { opacity: 1; transform: scale(1) } }
-    @keyframes guides { 0% { opacity: 0 } 10%, 88% { opacity: .65 } 99%, 100% { opacity: 0 } }
     @media (prefers-reduced-motion: reduce) {
       g[style], path[style] { animation: none !important; opacity: 1 !important; transform: none !important }
-      path[stroke-dasharray], .construction-guides { display: none !important }
+      path[stroke-dasharray] { display: none !important }
     }
   </style>
   <rect width="236" height="274" fill="#20282B"/>
-  <g class="construction-guides" style="animation:guides 3600ms linear both" fill="none">
-    <rect x="0.5" y="0.5" width="235" height="273" stroke="#5ec4eb" stroke-opacity=".35"/>
-    <line x1="118.016" y1="14" x2="118.016" y2="256" stroke="#f5c400" stroke-dasharray="7 3 1.5 3"/>
-    <line x1="67.74" y1="196" x2="67.74" y2="240" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="168.26" y1="196" x2="168.26" y2="240" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="57.536" y1="40" x2="57.536" y2="204" stroke="#5ec4eb" stroke-opacity=".4"/>
-    <line x1="178.512" y1="40" x2="178.512" y2="204" stroke="#5ec4eb" stroke-opacity=".4"/>
-    <line x1="69.632" y1="100" x2="69.632" y2="181" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="87.77600000000001" y1="100" x2="87.77600000000001" y2="181" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="95.84" y1="100" x2="95.84" y2="181" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="113.98400000000001" y1="100" x2="113.98400000000001" y2="181" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="122.048" y1="100" x2="122.048" y2="181" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="140.192" y1="100" x2="140.192" y2="181" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="148.256" y1="100" x2="148.256" y2="181" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="166.4" y1="100" x2="166.4" y2="181" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="64" y1="103.232" x2="172" y2="103.232" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="64" y1="124.736" x2="172" y2="124.736" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="64" y1="132.8" x2="172" y2="132.8" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="64" y1="150.94400000000002" x2="172" y2="150.94400000000002" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="64" y1="159.008" x2="172" y2="159.008" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="64" y1="177.15200000000002" x2="172" y2="177.15200000000002" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="60" y1="134.816" x2="176" y2="134.816" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="60" y1="139.52" x2="176" y2="139.52" stroke="#5ec4eb" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="57.536" y1="102.224" x2="118.016" y2="48.834" stroke="#f5c400" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="178.512" y1="102.224" x2="118.016" y2="48.834" stroke="#f5c400" stroke-opacity=".4" stroke-dasharray="3 3"/>
-    <line x1="56" y1="204" x2="180" y2="204" stroke="#5ec4eb" stroke-opacity=".4"/>
-    <line x1="56" y1="232" x2="180" y2="232" stroke="#5ec4eb" stroke-opacity=".4"/>
-  </g>
   <g transform="translate(32 32)">
     <g transform="translate(0 0) scale(0.336)">
       <path d="M243.1 54.9A20 20 0 0 1 268.9 54.9L426.07 187.61A28 28 0 0 1 436 209L436 440A28 28 0 0 1 408 468L104 468A28 28 0 0 1 76 440L76 209A28 28 0 0 1 85.93 187.61Z" fill="#f5c400" style="opacity:0;animation:reveal 292ms cubic-bezier(.33,1,.68,1) 644ms both"/>
