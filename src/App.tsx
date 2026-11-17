@@ -10,6 +10,7 @@ import { fetchRemoteScriptUrl } from "./lib/remoteConfig";
 import { CATEGORIES, getCategory, loadSettings, logGidOf, saveSettings, SETTINGS_STORAGE_KEY } from "./lib/settings";
 import type { CategoryId, Settings } from "./lib/settings";
 import AdminPage from "./pages/AdminPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import Page01Dept from "./pages/01_dept";
 import Page02Dept from "./pages/02_dept";
 
@@ -35,7 +36,7 @@ export default function App() {
     saveSettings(next);
   }, []);
 
-  const page: CategoryId | "admin" = route ?? settings.active;
+  const page: CategoryId | "admin" = route === null || route === "notfound" ? settings.active : route;
   const activeId: CategoryId = page === "admin" ? settings.active : page;
   const category = getCategory(activeId);
   const { data, loading, refresh, acceptProduct } = useSheetData(settings.links[activeId]);
@@ -104,8 +105,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.title = page === "admin" ? `Настройки · ${APP_TITLE}` : `${category.title} · ${APP_TITLE}`;
-  }, [page, category.title]);
+    document.title =
+      route === "notfound"
+        ? `Страница не найдена (404) · ${APP_TITLE}`
+        : page === "admin"
+          ? `Настройки · ${APP_TITLE}`
+          : `${category.title} · ${APP_TITLE}`;
+  }, [route, page, category.title]);
+
+  if (route === "notfound") {
+    return <NotFoundPage basePath={basePath} onHome={() => navigate(settings.active)} />;
+  }
 
   if (page === "admin") {
     return <AdminPage settings={settings} onChange={updateSettings} onBack={() => navigate(settings.active)} />;
